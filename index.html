@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Monitoring Sensor Real-Time</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(8.5px);
+            -webkit-backdrop-filter: blur(8.5px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .sensor-value {
+            font-size: 3rem;
+            font-weight: 700;
+        }
+        .footer {
+            margin-top: 3rem;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        .unique-header {
+            font-family: 'Courier New', Courier, monospace;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 4px #00000088;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-connecting {
+            background-color: #ffc107;
+            animation: pulse 1.5s infinite;
+        }
+        .status-connected {
+            background-color: #28a745;
+        }
+        .status-error {
+            background-color: #dc3545;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <h1 class="text-center mb-4 unique-header">Monitoring Sensor Real-Time</h1>
+        <div class="row justify-content-center g-4">
+            <div class="col-md-4 col-sm-6">
+                <div class="card p-4 text-center">
+                    <h5>Sensor Suhu (°C)</h5>
+                    <div id="sensor-temperature" class="sensor-value">--</div>
+                    <small class="text-muted" id="time-temperature"></small>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="card p-4 text-center">
+                    <h5>Sensor Kelembaban (%)</h5>
+                    <div id="sensor-humidity" class="sensor-value">--</div>
+                    <small class="text-muted" id="time-humidity"></small>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="card p-4 text-center">
+                    <h5>Sensor Cahaya (Lux)</h5>
+                    <div id="sensor-light" class="sensor-value">--</div>
+                    <small class="text-muted" id="time-light"></small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status Indicator -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card p-3 text-center">
+                    <h6>Status Sistem</h6>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="status-indicator me-2" id="status-indicator"></div>
+                        <span id="status-text">Menghubungkan ke sensor...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer text-center mt-5">
+            &copy; 2025 Monitoring Sensor Real-Time.
+            <div class="mt-1 small" id="connection-time"></div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle (Popper + Bootstrap) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Ganti URL ini dengan alamat backend PHP Anda yang bisa diakses publik
+        const apiUrl = "http://alamat-server-php-anda.com/data.php";
+
+        // Elements for status
+        const statusIndicator = document.getElementById('status-indicator');
+        const statusText = document.getElementById('status-text');
+        
+        // Update status function
+        function updateStatus(type, message) {
+            statusIndicator.className = 'status-indicator';
+            if (type === 'connecting') {
+                statusIndicator.classList.add('status-connecting');
+                statusText.textContent = message;
+            } else if (type === 'connected') {
+                statusIndicator.classList.add('status-connected');
+                statusText.textContent = message;
+            } else if (type === 'error') {
+                statusIndicator.classList.add('status-error');
+                statusText.textContent = message;
+            }
+        }
+        
+        // Show connection time
+        function updateConnectionTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('id-ID');
+            document.getElementById('connection-time').textContent = `Terhubung sejak: ${timeString}`;
+        }
+        
+        async function fetchSensorData() {
+            try {
+                updateStatus('connecting', 'Mengambil data sensor...');
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+
+                if (data.connected) {
+                    // Sensor terhubung, tampilkan data sensor
+                    document.getElementById('sensor-temperature').textContent = data.temperature.toFixed(1);
+                    document.getElementById('time-temperature').textContent = `Terakhir diperbarui: ${data.time}`;
+
+                    document.getElementById('sensor-humidity').textContent = data.humidity.toFixed(1);
+                    document.getElementById('time-humidity').textContent = `Terakhir diperbarui: ${data.time}`;
+
+                    document.getElementById('sensor-light').textContent = data.light.toFixed(0);
+                    document.getElementById('time-light').textContent = `Terakhir diperbarui: ${data.time}`;
+
+                    updateStatus('connected', 'Terhubung ke sensor - Data real-time aktif');
+                } else {
+                    // Sensor belum terhubung, kosongkan data dan tampilkan status error
+                    document.getElementById('sensor-temperature').textContent = '--';
+                    document.getElementById('time-temperature').textContent = '';
+
+                    document.getElementById('sensor-humidity').textContent = '--';
+                    document.getElementById('time-humidity').textContent = '';
+
+                    document.getElementById('sensor-light').textContent = '--';
+                    document.getElementById('time-light').textContent = '';
+
+                    updateStatus('error', 'Sensor belum terhubung - Menunggu koneksi sensor');
+                }
+            } catch (error) {
+                console.error('Gagal mengambil data sensor:', error);
+                updateStatus('error', 'Koneksi error - Cek kembali sensor');
+            }
+        }
+
+        // Initial connection time
+        updateConnectionTime();
+        
+        // Fetch data setiap 3 detik
+        fetchSensorData();
+        setInterval(fetchSensorData, 3000);
+    </script>
+</body>
+</html>
