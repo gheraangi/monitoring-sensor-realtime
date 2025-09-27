@@ -341,7 +341,7 @@ body {
     right: 0;
     height: 1px;
     background: rgba(255, 255, 255, 0.3);
-}
+    }
 .or-divider span {
     background: rgba(255, 255, 255, 0.1);
     padding: 0 1rem;
