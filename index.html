@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Monitoring Sensor Real-Time</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Bootstrap Icons CSS (Diperlukan untuk ikon di menu) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            min-height: 100vh;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(8.5px);
+            -webkit-backdrop-filter: blur(8.5px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .sensor-value {
+            font-size: 3rem;
+            font-weight: 700;
+        }
+        .footer {
+            margin-top: 3rem;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        .unique-header {
+            font-family: 'Courier New', Courier, monospace;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 4px #00000088;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-connecting {
+            background-color: #ffc107;
+            animation: pulse 1.5s infinite;
+        }
+        .status-connected {
+            background-color: #28a745;
+        }
+        .status-error {
+            background-color: #dc3545;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        /* New styles for the landing page */
+        #landing-page {
+            text-align: center;
+            padding: 3rem;
+            max-width: 800px;
+            margin: auto;
+        }
+        #landing-page h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            font-family: 'Georgia', serif;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+        }
+        #landing-page p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        #landing-page .btn-main {
+            background-color: #28a745;
+            border-color: #28a745;
+            font-size: 1.3rem;
+            padding: 0.8rem 2.5rem;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+        #landing-page .btn-main:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        #landing-page .copyright {
+            margin-top: 3rem;
+            font-size: 0.85rem;
+            opacity: 0.6;
+        }
+
+        /* Hide main content initially */
+        #main-content {
+            display: none;
+            width: 100%; /* Ensure main content takes full width */
+        }
+
+        /* Styles for sensor info and warning */
+        .sensor-info {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            text-align: left;
+            padding: 0 1rem;
+        }
+        .sensor-info strong {
+            color: #a2d9ff;
+        }
+        .warning-message {
+            background-color: rgba(220, 53, 69, 0.8); /* Red with transparency */
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-weight: bold;
+            animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both infinite;
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* New Styles for Menu/Sidebar */
+        .menu-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1050;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: none; /* Hidden initially, shown only in dashboard */
+        }
+        .menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        .menu-toggle span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background: #fff;
+            margin: 5px 0;
+            border-radius: 2px;
+            transition: 0.3s;
+        }
+        .menu-toggle.active span:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+        }
+        .menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+        .menu-toggle.active span:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+        }
+
+        /* Sidebar Menu */
+        #sidebar-menu {
+            position: fixed;
+            top: 0;
+            left: -300px; /* Hidden by default */
+            width: 300px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8.5px);
+            -webkit-backdrop-filter: blur(8.5px);
+            border-right: 1px solid rgba(255, 255, 255, 0.18);
+            z-index: 1040;
+            transition: left 0.3s ease;
+            padding-top: 70px; /* Space for toggle button */
+        }
+        #sidebar-menu.active {
+            left: 0;
+        }
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1030;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .menu-item {
+            display: block;
+            padding: 15px 20px;
+            color: #fff;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.3s ease;
+            font-size: 1.1rem;
+        }
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .menu-item i {
+            margin-right: 10px;
+            width: 20px;
+        }
+        .back-to-landing { /* Menggunakan nama kelas asli */
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(40, 167, 69, 0.8);
+            border: none;
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .back-to-landing:hover { /* Menggunakan nama kelas asli */
+            background: rgba(40, 167, 69, 1);
+            transform: translateX(-5px);
+        }
+        .back-to-landing i {
+            margin-right: 8px;
+        }
+
+        /* Styles for New Sections (Registration and History) */
+        .section {
+            display: none;
+            padding: 2rem;
+            max-width: 800px;
+            margin: auto;
+        }
+        .section.active {
+            display: block;
+        }
+        .section h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #a2d9ff;
+            font-family: 'Georgia', serif;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .registration-form {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(8.5px);
+        }
+        .registration-form .form-control {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+        .registration-form .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .registration-form .btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            transition: all 0.3s ease;
+        }
+        .registration-form .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+        .google-btn {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            color: #fff;
+            border: none;
+            width: 100%;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 25px;
+            font-weight: bold;
+        }
+        .google-btn:hover {
+            background: linear-gradient(135deg, #357ae8, #2d8e4e);
+            transform: translateY(-2px);
+        }
+        .or-divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            position: relative;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .or-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .or-divider span {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0 1rem;
+        }
+
+        /* History Section */
+        .history-table {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        .history-table table {
+            width: 100%;
+            color: #fff;
+        }
+        .history-table th,
+        .history-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .history-table th {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+        .no-data {
+            text-align: center;
+            padding: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Ensure sections are centered like landing */
+        body > .section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Hide dashboard sensors when in other sections */
+        #dashboard-sensors {
+            display: none;
+        }
+        #dashboard-sensors.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Landing Page -->
+    <div id="landing-page" class="card">
+        <h1 class="unique-header">Selamat Datang di <br> <span style="color: #a2d9ff;">SensorGuard</span></h1>
+        <p>Platform monitoring sensor real-time yang inovatif dan intuitif. Dapatkan data suhu, kelembaban, dan cahaya secara instan untuk lingkungan Anda.</p>
+        <button id="enter-dashboard-btn" class="btn btn-main btn-lg">Mulai Monitoring</button>
+        <div class="copyright">
+            &copy; 2025 SensorGuard. Hak Cipta Dilindungi.
+        </div>
+    </div>
+
+    <!-- Menu Toggle Button (Hamburger) -->
+    <div id="menu-toggle" class="menu-toggle">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <!-- Sidebar Menu -->
+    <div id="sidebar-menu">
+        <a href="#" class="menu-item" id="menu-registration">
+            <i class="bi bi-person-plus"></i> Registrasi Akun
+        </a>
+        <a href="#" class="menu-item" id="menu-history">
+            <i class="bi bi-clock-history"></i> History Monitoring
+        </a>
+        <button class="back-to-landing" id="back-to-landing">
+            <i class="bi bi-arrow-left"></i> Kembali ke Dashboard Depan
+        </button>
+    </div>
+
+    <!-- Overlay for Menu -->
+    <div id="menu-overlay" class="menu-overlay"></div>
+
+    <!-- Main Dashboard Content -->
+    <div id="main-content" class="container py-5">
+        <!-- Header with Menu Toggle -->
+        <div class="row mb-4">
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <h1 class="unique-header mb-0">Monitoring Sensor Real-Time</h1>
+                <!-- START: Penambahan elemen status koneksi -->
+                <div class="card p-2 d-inline-flex align-items-center justify-content-center flex-row">
+                    <span id="status-indicator" class="status-indicator me-2"></span>
+                    <span id="status-text">Menunggu koneksi...</span>
+                </div>
+                <!-- END: Penambahan elemen status koneksi -->
+            </div>
+        </div>
+
+        <!-- Dashboard Sensors Section -->
+        <div id="dashboard-sensors" class="row justify-content-center g-4 section active"> <!-- Tambahkan class 'section' dan 'active' -->
+            <!-- Sensor Suhu -->
+            <div class="col-md-4 col-sm-6">
+                <div class="card p-4 text-center">
+                    <h5>Sensor Suhu (°C)</h5>
+                    <div id="sensor-temperature" class="sensor-value">--</div>
+                    <small class="text-muted" id="time-temperature"></small>
+                    <div class="sensor-info">
+                        <p><strong>Pengenalan:</strong> Sensor suhu mengukur tingkat panas atau dingin di lingkungan.</p>
+                        <p><strong>Fungsi & Manfaat:</strong> Penting untuk menjaga kondisi optimal di rumah, kantor, atau gudang. Membantu mencegah kerusakan peralatan atau ketidaknyamanan.</p>
+                        <p><strong>Arti Angka:</strong>
+                            <ul>
+                                <li>&lt; 18°C: Dingin</li>
+                                <li>18-25°C: Normal/Nyaman</li>
+                                <li>&gt; 25°C: Hangat/Panas</li>
+                            </ul>
+                        </p>
+                    </div>
+                    <div id="warning-temperature" class="warning-message" style="display: none;"></div>
+                </div>
+            </div>
+            <!-- Sensor Kelembaban -->
+            <div class="col-md-4 col-sm-6">
+                <div class="card p-4 text-center">
+                    <h5>Sensor Kelembaban (%)</h5>
+                    <div id="sensor-humidity" class="sensor-value">--</div>
+                    <small class="text-muted" id="time-humidity"></small>
+                    <div class="sensor-info">
+                        <p><strong>Pengenalan:</strong> Sensor kelembaban mengukur kadar uap air di udara.</p>
+                        <p><strong>Fungsi & Manfaat:</strong> Penting untuk kesehatan pernapasan, kenyamanan, dan menjaga kualitas barang yang sensitif terhadap kelembaban (misalnya, elektronik, dokumen).</p>
+                        <p><strong>Arti Angka:</strong>
+                            <ul>
+                                <li>&lt; 40%: Kering</li>
+                                <li>40-60%: Normal/Ideal</li>
+                                <li>&gt; 60%: Lembab/Basah</li>
+                            </ul>
+                        </p>
+                    </div>
+                    <div id="warning-humidity" class="warning-message" style="display: none;"></div>
+                </div>
+            </div>
+            <!-- Sensor Cahaya -->
+            <div class="col-md-4 col-sm-6">
+                <div class="card p-4 text-center">
+                    <h5>Sensor Cahaya (Lux)</h5>
+                    <div id="sensor-light" class="sensor-value">--</div>
+                    <small class="text-muted" id="time-light"></small>
+                    <div class="sensor-info">
+                        <p><strong>Pengenalan:</strong> Sensor cahaya mengukur intensitas cahaya di lingkungan.</p>
+                        <p><strong>Fungsi & Manfaat:</strong> Mengatur pencahayaan otomatis, menghemat energi, dan menciptakan suasana yang nyaman. Penting untuk pertanian, rumah pintar, dan keamanan.</p>
+                        <p><strong>Arti Angka:</strong>
+                            <ul>
+                                <li>&lt; 50 Lux: Gelap</li>
+                                <li>50-500 Lux: Normal/Cukup</li>
+                                <li>&gt; 500 Lux: Terang</li>
+                            </ul>
+                        </p>
+                    </div>
+                    <div id="warning-light" class="warning-message" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- START: Penambahan Section Registrasi Akun -->
+        <div id="registration-section" class="section">
+            <h2>Registrasi Akun Baru</h2>
+            <div class="registration-form">
+                <form>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" placeholder="Nama Lengkap" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="email" class="form-control" placeholder="Email" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" class="form-control" placeholder="Password" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" class="form-control" placeholder="Konfirmasi Password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Daftar</button>
+                </form>
+                <div class="or-divider"><span>ATAU</span></div>
+                <button class="google-btn">
+                    <i class="bi bi-google me-2"></i> Daftar dengan Google
+                </button>
+            </div>
+        </div>
+        <!-- END: Penambahan Section Registrasi Akun -->
+
+        <!-- START: Penambahan Section History Monitoring -->
+        <div id="history-section" class="section">
+            <h2>History Monitoring Sensor</h2>
+            <div class="history-table">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Waktu</th>
+                            <th>Suhu (°C)</th>
+                            <th>Kelembaban (%)</th>
+                            <th>Cahaya (Lux)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-body">
+                        <!-- Data history akan dimuat di sini oleh JavaScript -->
+                        <tr><td colspan="4" class="no-data">Memuat data history...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- END: Penambahan Section History Monitoring -->
+
+        <footer class="footer text-center">
+            &copy; 2025 SensorGuard. Hak Cipta Dilindungi.
+        </footer>
+    </div>
+
+    <!-- Bootstrap JS Bundle (Popper included) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
