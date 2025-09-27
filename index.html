@@ -15,9 +15,8 @@
             min-height: 100vh;
             color: #fff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            /* display: flex; /* DIHAPUS DARI SINI, AKAN DIATUR OLEH JS UNTUK LANDING PAGE */
-            /* justify-content: center; */
-            /* align-items: center; */
+            /* Hapus display: flex, justify-content, align-items dari body */
+            /* Ini akan dikelola oleh JS untuk landing page, dan main-content akan menjadi blok normal */
             margin: 0; /* Remove default body margin */
             padding: 0; /* Remove default body padding */
         }
@@ -448,77 +447,83 @@
     <div id="main-content" class="container py-5">
         <!-- Header with Menu Toggle -->
         <div class="row mb-4 align-items-center">
-            <div class="col-md-6 col-sm-12">
+            <div class="col-12"> <!-- Menggunakan col-12 untuk judul agar tidak ada konflik dengan status -->
                 <h1 class="unique-header mb-0">Monitoring Sensor Real-Time</h1>
-            </div>
-            <div class="col-md-6 col-sm-12 text-md-end text-center mt-3 mt-md-0">
-                <div class="card p-2 d-inline-flex align-items-center justify-content-center flex-row">
-                    <span id="status-indicator" class="status-indicator me-2"></span>
-                    <span id="status-text">Menunggu koneksi...</span>
-                </div>
             </div>
         </div>
 
         <!-- Dashboard Sensors Section -->
-        <div id="dashboard-sensors" class="row justify-content-center g-4 section active">
-            <!-- Sensor Suhu -->
-            <div class="col-md-4 col-sm-6">
-                <div class="card p-4 text-center">
-                    <h5>Sensor Suhu (°C)</h5>
-                    <div id="sensor-temperature" class="sensor-value">--</div>
-                    <small class="text-muted" id="time-temperature"></small>
-                    <div class="sensor-info">
-                        <p><strong>Pengenalan:</strong> Sensor suhu mengukur tingkat panas atau dingin di lingkungan.</p>
-                        <p><strong>Fungsi & Manfaat:</strong> Penting untuk menjaga kondisi optimal di rumah, kantor, atau gudang. Membantu mencegah kerusakan peralatan atau ketidaknyamanan.</p>
-                        <p><strong>Arti Angka:</strong>
-                            <ul>
-                                <li>&lt; 18°C: Dingin</li>
-                                <li>18-25°C: Normal/Nyaman</li>
-                                <li>&gt; 25°C: Hangat/Panas</li>
-                            </ul>
-                        </p>
+        <div id="dashboard-sensors" class="section active">
+            <div class="row justify-content-center g-4"> <!-- Ini adalah row untuk 3 kartu sensor -->
+                <!-- Sensor Suhu -->
+                <div class="col-md-4 col-sm-6">
+                    <div class="card p-4 text-center">
+                        <h5>Sensor Suhu (°C)</h5>
+                        <div id="sensor-temperature" class="sensor-value">--</div>
+                        <small class="text-muted" id="time-temperature"></small>
+                        <div class="sensor-info">
+                            <p><strong>Pengenalan:</strong> Sensor suhu mengukur tingkat panas atau dingin di lingkungan.</p>
+                            <p><strong>Fungsi & Manfaat:</strong> Penting untuk menjaga kondisi optimal di rumah, kantor, atau gudang. Membantu mencegah kerusakan peralatan atau ketidaknyamanan.</p>
+                            <p><strong>Arti Angka:</strong>
+                                <ul>
+                                    <li>&lt; 18°C: Dingin</li>
+                                    <li>18-25°C: Normal/Nyaman</li>
+                                    <li>&gt; 25°C: Hangat/Panas</li>
+                                </ul>
+                            </p>
+                        </div>
+                        <div id="warning-temperature" class="warning-message" style="display: none;"></div>
                     </div>
-                    <div id="warning-temperature" class="warning-message" style="display: none;"></div>
+                </div>
+                <!-- Sensor Kelembaban -->
+                <div class="col-md-4 col-sm-6">
+                    <div class="card p-4 text-center">
+                        <h5>Sensor Kelembaban (%)</h5>
+                        <div id="sensor-humidity" class="sensor-value">--</div>
+                        <small class="text-muted" id="time-humidity"></small>
+                        <div class="sensor-info">
+                            <p><strong>Pengenalan:</strong> Sensor kelembaban mengukur kadar uap air di udara.</p>
+                            <p><strong>Fungsi & Manfaat:</strong> Penting untuk kesehatan pernapasan, kenyamanan, dan menjaga kualitas barang yang sensitif terhadap kelembaban (misalnya, elektronik, dokumen).</p>
+                            <p><strong>Arti Angka:</strong>
+                                <ul>
+                                    <li>&lt; 40%: Kering</li>
+                                    <li>40-60%: Normal/Ideal</li>
+                                    <li>&gt; 60%: Lembab/Basah</li>
+                                </ul>
+                            </p>
+                        </div>
+                        <div id="warning-humidity" class="warning-message" style="display: none;"></div>
+                    </div>
+                </div>
+                <!-- Sensor Cahaya -->
+                <div class="col-md-4 col-sm-6">
+                    <div class="card p-4 text-center">
+                        <h5>Sensor Cahaya (Lux)</h5>
+                        <div id="sensor-light" class="sensor-value">--</div>
+                        <small class="text-muted" id="time-light"></small>
+                        <div class="sensor-info">
+                            <p><strong>Pengenalan:</strong> Sensor cahaya mengukur intensitas cahaya di lingkungan.</p>
+                            <p><strong>Fungsi & Manfaat:</strong> Mengatur pencahayaan otomatis, menghemat energi, dan menciptakan suasana yang nyaman. Penting untuk pertanian, rumah pintar, dan keamanan.</p>
+                            <p><strong>Arti Angka:</strong>
+                                <ul>
+                                    <li>&lt; 50 Lux: Gelap</li>
+                                    <li>50-500 Lux: Normal/Cukup</li>
+                                    <li>&gt; 500 Lux: Terang</li>
+                                </ul>
+                            </p>
+                        </div>
+                        <div id="warning-light" class="warning-message" style="display: none;"></div>
+                    </div>
                 </div>
             </div>
-            <!-- Sensor Kelembaban -->
-            <div class="col-md-4 col-sm-6">
-                <div class="card p-4 text-center">
-                    <h5>Sensor Kelembaban (%)</h5>
-                    <div id="sensor-humidity" class="sensor-value">--</div>
-                    <small class="text-muted" id="time-humidity"></small>
-                    <div class="sensor-info">
-                        <p><strong>Pengenalan:</strong> Sensor kelembaban mengukur kadar uap air di udara.</p>
-                        <p><strong>Fungsi & Manfaat:</strong> Penting untuk kesehatan pernapasan, kenyamanan, dan menjaga kualitas barang yang sensitif terhadap kelembaban (misalnya, elektronik, dokumen).</p>
-                        <p><strong>Arti Angka:</strong>
-                            <ul>
-                                <li>&lt; 40%: Kering</li>
-                                <li>40-60%: Normal/Ideal</li>
-                                <li>&gt; 60%: Lembab/Basah</li>
-                            </ul>
-                        </p>
+
+            <!-- Status Koneksi di bawah kartu sensor -->
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <div class="card p-2 d-inline-flex align-items-center justify-content-center flex-row">
+                        <span id="status-indicator" class="status-indicator me-2"></span>
+                        <span id="status-text">Menunggu koneksi...</span>
                     </div>
-                    <div id="warning-humidity" class="warning-message" style="display: none;"></div>
-                </div>
-            </div>
-            <!-- Sensor Cahaya -->
-            <div class="col-md-4 col-sm-6">
-                <div class="card p-4 text-center">
-                    <h5>Sensor Cahaya (Lux)</h5>
-                    <div id="sensor-light" class="sensor-value">--</div>
-                    <small class="text-muted" id="time-light"></small>
-                    <div class="sensor-info">
-                        <p><strong>Pengenalan:</strong> Sensor cahaya mengukur intensitas cahaya di lingkungan.</p>
-                        <p><strong>Fungsi & Manfaat:</strong> Mengatur pencahayaan otomatis, menghemat energi, dan menciptakan suasana yang nyaman. Penting untuk pertanian, rumah pintar, dan keamanan.</p>
-                        <p><strong>Arti Angka:</strong>
-                            <ul>
-                                <li>&lt; 50 Lux: Gelap</li>
-                                <li>50-500 Lux: Normal/Cukup</li>
-                                <li>&gt; 500 Lux: Terang</li>
-                            </ul>
-                        </p>
-                    </div>
-                    <div id="warning-light" class="warning-message" style="display: none;"></div>
                 </div>
             </div>
         </div>
