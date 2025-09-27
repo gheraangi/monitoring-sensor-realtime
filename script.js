@@ -217,12 +217,12 @@ function showSection(sectionId) {
     // Kelola fetching: mulai jika dashboard, hentikan jika tidak
     if (sectionId === 'dashboard-sensors') {
         startSensorFetching();
-        // Pastikan menu toggle terlihat saat di dashboard
+        // Pastikan menu toggle terlihat di dashboard
         if (menuToggle) menuToggle.style.display = 'block';
     } else {
         stopSensorFetching();
-        // Sembunyikan menu toggle saat tidak di dashboard
-        if (menuToggle) menuToggle.style.display = 'none';
+        // Hapus baris ini agar menu toggle tetap terlihat di semua halaman
+        // if (menuToggle) menuToggle.style.display = 'none';
     }
 
     // Tutup menu setelah navigasi
@@ -286,7 +286,12 @@ enterDashboardBtn.addEventListener('click', () => {
     landingPage.style.display = 'none'; // Hide the landing page
     mainContent.style.display = 'block'; // Show the main dashboard content
 
-    // Show menu toggle only in dashboard
+    // Pastikan body tidak lagi flex untuk landing page, agar main-content bisa jadi blok normal
+    document.body.style.display = 'block';
+    document.body.style.justifyContent = 'initial';
+    document.body.style.alignItems = 'initial';
+
+    // Show menu toggle
     if (menuToggle) menuToggle.style.display = 'block';
 
     // Set initial active section to dashboard
@@ -351,4 +356,10 @@ if (googleBtn) {
 document.addEventListener('DOMContentLoaded', () => {
     mainContent.style.display = 'none';
     if (menuToggle) menuToggle.style.display = 'none';
+
+    // Pastikan landing page terpusat saat pertama kali dimuat
+    landingPage.style.display = 'flex';
+    document.body.style.display = 'flex';
+    document.body.style.justifyContent = 'center';
+    document.body.style.alignItems = 'center';
 });
