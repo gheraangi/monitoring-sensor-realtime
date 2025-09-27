@@ -69,7 +69,7 @@ body {
     padding: 3rem;
     max-width: 800px;
     margin: auto;
-    display: flex; /* Use flex for centering */
+    /* display: flex; /* Use flex for centering */
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -322,7 +322,7 @@ body {
     padding: 0.75rem;
     border-radius: 25px;
     font-weight: bold;
-        }
+}
 .google-btn:hover {
     background: linear-gradient(135deg, #357ae8, #2d8e4e);
     transform: translateY(-2px);
@@ -375,12 +375,12 @@ body {
 }
 
 /* Ensure sections are centered like landing */
-body > .section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-}
+/* body > .section { /* DIHAPUS DARI SINI */
+/*    display: flex; */
+/*    justify-content: center; */
+/*    align-items: center; */
+/*    min-height: 100vh; */
+/* } */
 
 /* Hide dashboard sensors when in other sections */
 #dashboard-sensors {
