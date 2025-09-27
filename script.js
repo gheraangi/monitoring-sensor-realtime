@@ -287,9 +287,10 @@ enterDashboardBtn.addEventListener('click', () => {
     mainContent.style.display = 'block'; // Show the main dashboard content
 
     // Pastikan body tidak lagi flex untuk landing page, agar main-content bisa jadi blok normal
-    document.body.style.display = 'block';
-    document.body.style.justifyContent = 'initial';
-    document.body.style.alignItems = 'initial';
+    // Hapus manipulasi style body di sini, biarkan CSS yang mengelola
+    // document.body.style.display = 'block';
+    // document.body.style.justifyContent = 'initial';
+    // document.body.style.alignItems = 'initial';
 
     // Show menu toggle
     if (menuToggle) menuToggle.style.display = 'block';
@@ -358,8 +359,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (menuToggle) menuToggle.style.display = 'none';
 
     // Pastikan landing page terpusat saat pertama kali dimuat
-    landingPage.style.display = 'flex';
-    document.body.style.display = 'flex';
-    document.body.style.justifyContent = 'center';
-    document.body.style.alignItems = 'center';
+    // Hapus manipulasi style body di sini, biarkan CSS yang mengelola
+    // landingPage.style.display = 'flex';
+    // document.body.style.display = 'flex';
+    // document.body.style.justifyContent = 'center';
+    // document.body.style.alignItems = 'center';
 });
